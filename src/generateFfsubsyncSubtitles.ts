@@ -12,7 +12,7 @@ export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: str
     await access(outputPath);
     return {
       success: true,
-      message: `Skipping ${srtBaseName} - already processed`,
+      message: `Skipping ${outputPath} - already processed`,
     };
   } catch (error) {
     // File doesn't exist, proceed with sync
@@ -24,13 +24,13 @@ export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: str
     await execPromise(command);
     return {
       success: true,
-      message: `Successfully processed: ${srtBaseName}`,
+      message: `Successfully processed: ${outputPath}`,
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
       success: false,
-      message: `Error processing ${srtBaseName}: ${errorMessage}`,
+      message: `Error processing ${outputPath}: ${errorMessage}`,
     };
   }
 }

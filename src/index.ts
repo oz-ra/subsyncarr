@@ -8,6 +8,7 @@ const SCAN_DIR = '/scan_dir';
 
 async function main(): Promise<void> {
   const scanDir = SCAN_DIR;
+  console.log(`${new Date().toLocaleString()} scanning ${scanDir} for .srt files (this could take a while)...`);
 
   try {
     // Find all .srt files
