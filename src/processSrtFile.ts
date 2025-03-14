@@ -3,6 +3,7 @@ import { findMatchingVideoFile } from './findMatchingVideoFile';
 import { generateAutosubsyncSubtitles } from './generateAutosubsyncSubtitles';
 import { generateFfsubsyncSubtitles } from './generateFfsubsyncSubtitles';
 import { generateAlassSubtitles } from './generateAlassSubtitles';
+import { log } from './loggingConfig';
 
 export const processSrtFile = async (srtFile: string, languageCode: string) => {
   const videoFile = findMatchingVideoFile(srtFile);
@@ -11,17 +12,17 @@ export const processSrtFile = async (srtFile: string, languageCode: string) => {
   if (videoFile) {
     if (includeEngines.includes('ffsubsync')) {
       const ffsubsyncResult = await generateFfsubsyncSubtitles(srtFile, videoFile, languageCode);
-      console.log(`${new Date().toLocaleString()} ffsubsync result: ${ffsubsyncResult.message}`);
+      log(`ffsubsync result: ${ffsubsyncResult.message}`);
     }
     if (includeEngines.includes('autosubsync')) {
       const autosubsyncResult = await generateAutosubsyncSubtitles(srtFile, videoFile, languageCode);
-      console.log(`${new Date().toLocaleString()} autosubsync result: ${autosubsyncResult.message}`);
+      log(`autosubsync result: ${autosubsyncResult.message}`);
     }
     if (includeEngines.includes('alass')) {
       const alassResult = await generateAlassSubtitles(srtFile, videoFile, languageCode);
-      console.log(`${new Date().toLocaleString()} alass result: ${alassResult.message}`);
+      log(`alass result: ${alassResult.message}`);
     }
   } else {
-    console.log(`${new Date().toLocaleString()} No matching video file found for: ${basename(srtFile)}`);
+    log(`No matching video file found for: ${basename(srtFile)}`);
   }
 };
