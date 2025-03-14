@@ -69,16 +69,21 @@ View container logs:
 ```bash
 docker logs -f subsyncarr
 ```
+
+## Changes
+
 After the changes, the output filenames will have the language code at the end of the filename. Here are the examples of how the filenames will look after the change:
 
-Before the Change
+- Before the Change
 moviename.ffsubsync.srt
 moviename.autosubsync.srt
 moviename.alass.srt
-After the Change
+
+- After the Change
 moviename.ffsubsync.[languageCode].srt
 moviename.autosubsync.[languageCode].srt
 moviename.alass.[languageCode].srt
+
 For instance, if the language code is en (for English):
 
 moviename.ffsubsync.en.srt
