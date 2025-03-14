@@ -100,7 +100,7 @@ moviename.autosubsync.en.srt
 moviename.alass.en.srt
 ```
 
-#### Summary of Filename Conventions:
+#### Summary of Output Filename Conventions:
 
 With language code (default to "en"):
 ```txt
