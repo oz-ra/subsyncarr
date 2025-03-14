@@ -4,6 +4,9 @@ import { processSrtFile } from './processSrtFile';
 
 async function main(): Promise<void> {
   try {
+    // Get language code from environment variable
+    const languageCode = process.env.LANGUAGE_CODE === "" ? "" : (process.env.LANGUAGE_CODE ?? "en");
+
     // Find all .srt files
     const scanConfig = getScanConfig();
     const srtFiles = await findAllSrtFiles(scanConfig);
@@ -15,7 +18,7 @@ async function main(): Promise<void> {
 
     for (let i = 0; i < srtFiles.length; i += maxConcurrentSyncTasks) {
       const chunk = srtFiles.slice(i, i + maxConcurrentSyncTasks);
-      await Promise.all(chunk.map((srtFile) => processSrtFile(srtFile)));
+      await Promise.all(chunk.map((srtFile) => processSrtFile(srtFile, languageCode)));
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -26,3 +29,4 @@ async function main(): Promise<void> {
 }
 
 main();
+
