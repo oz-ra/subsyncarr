@@ -100,6 +100,22 @@ moviename.autosubsync.en.srt
 moviename.alass.en.srt
 ```
 
+#### Summary of Filename Conventions:
+
+With language code (default to "en"):
+```txt
+moviename.ffsubsync.en.srt
+moviename.autosubsync.en.srt
+moviename.alass.en.srt
+```
+
+Without language code (when supplied as an empty string):
+```txt
+moviename.ffsubsync.srt
+moviename.autosubsync.srt
+moviename.alass.srt
+```
+
 
 #### docker-compose.yaml
 
@@ -125,5 +141,6 @@ services:
       - EXCLUDE_PATHS=/movies/temp,/tv/downloads # Exclude certain sub-directories from the scan
       - MAX_CONCURRENT_SYNC_TASKS=1 # Defaults to 1 if not set. Higher number will consume more CPU but sync your library faster
       - INCLUDE_ENGINES=ffsubsync,autosubsync # If not set, all engines are used by default
-      - LANGUAGE_CODE=en # Specify the ISO 639-1 language code (e.g., "en" for English)
+      - LANGUAGE_CODE=en # Specify the ISO 639-1 language code (e.g., "en" for English) (Defaults to en if not supplied but is removed if supplied as "")
+
 ```
