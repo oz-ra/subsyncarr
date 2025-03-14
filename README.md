@@ -99,3 +99,31 @@ moviename.ffsubsync.en.srt
 moviename.autosubsync.en.srt
 moviename.alass.en.srt
 ```
+
+
+#### docker-compose.yaml
+
+```txt
+name: subsyncarr
+
+services:
+  subsyncarr:
+    image: mrorbitman/subsyncarr:latest
+    container_name: subsyncarr
+    volumes:
+      # Any path configured with SCAN_PATHS env var must be mounted
+      # If no scan paths are specified, it defaults to scan `/scan_dir` like example below.
+      # - /path/to/your/media:/scan_dir
+      - /path/to/movies:/movies
+      - /path/to/tv:/tv
+      - /path/to/anime:/anime
+    restart: unless-stopped
+    environment:
+      - TZ=Etc/UTC # Replace with your own timezone
+      - CRON_SCHEDULE=0 0 * * * # Runs every day at midnight by default
+      - SCAN_PATHS=/movies,/tv,/anime # Remember to mount these as volumes. Must begin with /. Default value is `/scan_dir`
+      - EXCLUDE_PATHS=/movies/temp,/tv/downloads # Exclude certain sub-directories from the scan
+      - MAX_CONCURRENT_SYNC_TASKS=1 # Defaults to 1 if not set. Higher number will consume more CPU but sync your library faster
+      - INCLUDE_ENGINES=ffsubsync,autosubsync # If not set, all engines are used by default
+      - LANGUAGE_CODE=en # Specify the ISO 639-1 language code (e.g., "en" for English)
+```
