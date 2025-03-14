@@ -144,3 +144,74 @@ services:
       - LANGUAGE_CODE=en # Specify the ISO 639-1 language code (e.g., "en" for English) (Defaults to en if not supplied but is removed if supplied as "")
 
 ```
+
+````markdown name=docker-compose-variables.md
+# Environment Variables for subsyncarr
+
+This document provides a detailed explanation of the environment variables used in the `docker-compose.yaml` file for the `subsyncarr` service. It includes all options and resultant actions.
+
+## Environment Variables
+
+### `TZ`
+- **Description**: Sets the timezone for the container.
+- **Example Value**: `Etc/UTC`
+- **Result**: The container will use the specified timezone for logging and scheduling.
+- **Default**: If not supplied, the timezone will default to UTC.
+
+### `CRON_SCHEDULE`
+- **Description**: Defines the cron schedule for running the sync tasks.
+- **Example Value**: `0 0 * * *`
+- **Result**: The sync tasks will run every day at midnight by default.
+- **Default**: If not supplied, the default schedule is `0 0 * * *` (every day at midnight).
+
+### `SCAN_PATHS`
+- **Description**: Specifies the paths to scan for `.srt` files.
+- **Example Value**: `/movies,/tv,/anime`
+- **Result**: The application will scan the specified paths for `.srt` files to process. These paths must be mounted as volumes in the container.
+- **Default**: If not supplied, the default path is `/scan_dir`.
+
+### `EXCLUDE_PATHS`
+- **Description**: Specifies paths to exclude from the scan.
+- **Example Value**: `/movies/temp,/tv/downloads`
+- **Result**: The application will exclude the specified paths from the scan.
+- **Default**: If not supplied, no paths will be excluded.
+
+### `MAX_CONCURRENT_SYNC_TASKS`
+- **Description**: Sets the maximum number of concurrent sync tasks.
+- **Example Value**: `1`
+- **Result**: Limits the number of sync tasks running simultaneously. Higher values will consume more CPU but will sync the library faster.
+- **Default**: If not supplied, the default value is `1`.
+
+### `INCLUDE_ENGINES`
+- **Description**: Specifies which engines to use for syncing.
+- **Example Value**: `ffsubsync,autosubsync`
+- **Result**: Only the specified engines will be used for syncing. If not set, all engines are used by default.
+- **Default**: If not supplied, all available engines will be used.
+
+### `LOGGING`
+- **Description**: Enables logging to a file if set to `true`.
+- **Example Value**: `true`
+- **Result**: If set to `true`, logs will be written to the file `subsyncarr.log` in the `config` directory in addition to being printed to the console.
+- **Default**: If not supplied, logging will only occur in the console.
+
+### `LANGUAGE_CODE`
+- **Description**: Sets the language code for processing `.srt` files.
+- **Example Value**: `en`
+- **Result**: The application will use the specified language code for processing `.srt` files. The default value is `en` (English).
+- **Default**: If not supplied, the default language code is `en`.
+
+#### `LANGUAGE_CODE` Options
+- `en` - English (default)
+- `es` - Spanish
+- `fr` - French
+- `de` - German
+- `it` - Italian
+- `pt` - Portuguese
+- `ru` - Russian
+- `zh` - Chinese
+- `ja` - Japanese
+- `ko` - Korean
+
+Depending on the implementation, you can extend this list to include other language codes supported by your application. The `LANGUAGE_CODE` variable ensures that the subtitles are processed in the specified language, which might affect tasks like synchronization, translation, or any other language-specific processing.
+
+````
