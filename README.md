@@ -145,7 +145,7 @@ services:
 
 ```
 
-````markdown name=docker-compose-variables.md
+
 # Environment Variables for subsyncarr
 
 This document provides a detailed explanation of the environment variables used in the `docker-compose.yaml` file for the `subsyncarr` service. It includes all options and resultant actions.
@@ -214,4 +214,4 @@ This document provides a detailed explanation of the environment variables used 
 
 Depending on the implementation, you can extend this list to include other language codes supported by your application. The `LANGUAGE_CODE` variable ensures that the subtitles are processed in the specified language, which might affect tasks like synchronization, translation, or any other language-specific processing.
 
-````
+
