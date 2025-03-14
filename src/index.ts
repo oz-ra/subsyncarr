@@ -1,6 +1,7 @@
 import { findAllSrtFiles } from './findAllSrtFiles';
 import { getScanConfig } from './config';
 import { processSrtFile } from './processSrtFile';
+import { log } from './loggingConfig';
 
 async function main(): Promise<void> {
   try {
@@ -10,7 +11,7 @@ async function main(): Promise<void> {
     // Find all .srt files
     const scanConfig = getScanConfig();
     const srtFiles = await findAllSrtFiles(scanConfig);
-    console.log(`${new Date().toLocaleString()} Found ${srtFiles.length} SRT files`);
+    log(`Found ${srtFiles.length} SRT files`);
 
     const maxConcurrentSyncTasks = process.env.MAX_CONCURRENT_SYNC_TASKS
       ? parseInt(process.env.MAX_CONCURRENT_SYNC_TASKS)
@@ -22,9 +23,9 @@ async function main(): Promise<void> {
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`${new Date().toLocaleString()} Error:`, errorMessage);
+    log(`Error: ${errorMessage}`);
   } finally {
-    console.log(`${new Date().toLocaleString()} subsyncarr completed.`);
+    log(`subsyncarr completed.`);
   }
 }
 
