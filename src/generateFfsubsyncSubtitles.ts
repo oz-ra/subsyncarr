@@ -1,34 +1,21 @@
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { basename, dirname, join } from 'path';
-import { execPromise, ProcessingResult } from './helpers';
-import { existsSync } from 'fs';
 
-export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: string): Promise<ProcessingResult> {
-  const directory = dirname(srtPath);
-  const srtBaseName = basename(srtPath, '.srt');
-  const outputPath = join(directory, `${srtBaseName}.ffsubsync.srt`);
+const execAsync = promisify(exec);
 
-  // Check if synced subtitle already exists
-  const exists = existsSync(outputPath);
-  if (exists) {
-    return {
-      success: true,
-      message: `Skipping ${outputPath} - already processed`,
-    };
-  }
+export async function generateFfsubsyncSubtitles(srtFile: string, videoFile: string, languageCode: string) {
+  const outputDir = dirname(srtFile);
+  const baseName = basename(srtFile, '.srt');
+  const outputFileName = languageCode ? `${baseName}.ffsubsync.${languageCode}.srt` : `${baseName}.ffsubsync.srt`;
+  const outputFilePath = join(outputDir, outputFileName);
+
+  const command = `ffsubsync "${videoFile}" -i "${srtFile}" -o "${outputFilePath}"`;
 
   try {
-    const command = `ffsubsync "${videoPath}" -i "${srtPath}" -o "${outputPath}"`;
-    console.log(`${new Date().toLocaleString()} Processing: ${command}`);
-    await execPromise(command);
-    return {
-      success: true,
-      message: `Successfully processed: ${outputPath}`,
-    };
+    const { stdout, stderr } = await execAsync(command);
+    return { message: `Successfully generated: ${outputFilePath}`, stdout, stderr };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return {
-      success: false,
-      message: `Error processing ${outputPath}: ${errorMessage}`,
-    };
+    return { message: `Failed to generate ffsubsync subtitles: ${error.message}`, error };
   }
 }
