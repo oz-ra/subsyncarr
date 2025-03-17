@@ -11,7 +11,8 @@ export async function generateFfsubsyncSubtitles(srtFile: string, videoFile: str
   const outputFileName = languageCode ? `${baseName}.ffsubsync.${languageCode}.srt` : `${baseName}.ffsubsync.srt`;
   const outputFilePath = join(outputDir, outputFileName);
 
-  const command = `ffsubsync \\\"${videoFile}\\\" -i \\\"${srtFile}\\\" -o \\\"${outputFilePath}\\\"`;
+  // Ensure paths are correctly quoted
+  const command = `ffsubsync "${videoFile}" -i "${srtFile}" -o "${outputFilePath}"`;
 
   try {
     const { stdout, stderr } = await execAsync(command);
