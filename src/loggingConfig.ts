@@ -1,11 +1,11 @@
 import { appendFileSync, accessSync, constants, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
 
 // Define the log file path
-const logFilePath = join(__dirname, '..', 'config', 'subsyncarr.log');
+const logFilePath = resolve('/config', 'subsyncarr.log');
 
 // Ensure the log directory exists
-const logDir = join(__dirname, '..', 'config');
+const logDir = resolve('/config');
 if (!existsSync(logDir)) {
   console.log(`Creating log directory: ${logDir}`);
   mkdirSync(logDir, { recursive: true });
