@@ -11,14 +11,15 @@ export async function generateAutosubsyncSubtitles(srtFile: string, videoFile: s
   const outputFileName = languageCode ? `${baseName}.autosubsync.${languageCode}.srt` : `${baseName}.autosubsync.srt`;
   const outputFilePath = join(outputDir, outputFileName);
 
-  const command = `autosubsync "${videoFile}" -i "${srtFile}" -o "${outputFilePath}"`;
+  const command = `autosubsync \"${videoFile}\" -i \"${srtFile}\" -o \"${outputFilePath}\"`;
 
   try {
     const { stdout, stderr } = await execAsync(command);
     log(`Successfully generated: ${outputFilePath}`);
     return { message: `Successfully generated: ${outputFilePath}`, stdout, stderr };
   } catch (error) {
-    log(`Failed to generate autosubsync subtitles: ${error.message}`);
-    return { message: `Failed to generate autosubsync subtitles: ${error.message}`, error };
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    log(`Failed to generate autosubsync subtitles: ${errorMessage}`);
+    return { message: `Failed to generate autosubsync subtitles: ${errorMessage}`, error };
   }
 }

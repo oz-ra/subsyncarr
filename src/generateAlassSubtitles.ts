@@ -11,14 +11,15 @@ export async function generateAlassSubtitles(srtFile: string, videoFile: string,
   const outputFileName = languageCode ? `${baseName}.alass.${languageCode}.srt` : `${baseName}.alass.srt`;
   const outputFilePath = join(outputDir, outputFileName);
 
-  const command = `alass "${videoFile}" "${srtFile}" "${outputFilePath}"`;
+  const command = `alass \"${videoFile}\" \"${srtFile}\" \"${outputFilePath}\"`;
 
   try {
     const { stdout, stderr } = await execAsync(command);
     log(`Successfully generated: ${outputFilePath}`);
     return { message: `Successfully generated: ${outputFilePath}`, stdout, stderr };
   } catch (error) {
-    log(`Failed to generate alass subtitles: ${error.message}`);
-    return { message: `Failed to generate alass subtitles: ${error.message}`, error };
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    log(`Failed to generate alass subtitles: ${errorMessage}`);
+    return { message: `Failed to generate alass subtitles: ${errorMessage}`, error };
   }
 }
