@@ -11,7 +11,8 @@ export async function generateAutosubsyncSubtitles(srtFile: string, videoFile: s
   const outputFileName = languageCode ? `${baseName}.autosubsync.${languageCode}.srt` : `${baseName}.autosubsync.srt`;
   const outputFilePath = join(outputDir, outputFileName);
 
-  const command = `autosubsync \"${videoFile}\" -i \"${srtFile}\" -o \"${outputFilePath}\"`;
+  // Ensure paths are correctly quoted
+  const command = `autosubsync "${videoFile}" -i "${srtFile}" -o "${outputFilePath}"`;
 
   try {
     const { stdout, stderr } = await execAsync(command);

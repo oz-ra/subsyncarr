@@ -11,7 +11,8 @@ export async function generateAlassSubtitles(srtFile: string, videoFile: string,
   const outputFileName = languageCode ? `${baseName}.alass.${languageCode}.srt` : `${baseName}.alass.srt`;
   const outputFilePath = join(outputDir, outputFileName);
 
-  const command = `alass \"${videoFile}\" \"${srtFile}\" \"${outputFilePath}\"`;
+  // Ensure paths are correctly quoted
+  const command = `alass "${videoFile}" "${srtFile}" "${outputFilePath}"`;
 
   try {
     const { stdout, stderr } = await execAsync(command);
