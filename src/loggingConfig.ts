@@ -1,7 +1,15 @@
-import { appendFileSync, accessSync, constants } from 'fs';
+import { appendFileSync, accessSync, constants, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
-const logFilePath = join(__dirname, 'subsyncarr.log');
+// Define the log file path
+const logFilePath = join(__dirname, '..', 'config', 'subsyncarr.log');
+
+// Ensure the log directory exists
+const logDir = join(__dirname, '..', 'config');
+if (!existsSync(logDir)) {
+  console.log(`Creating log directory: ${logDir}`);
+  mkdirSync(logDir, { recursive: true });
+}
 
 // Debug: Log the exact path being used for logging
 console.log(`Log file path: ${logFilePath}`);
@@ -9,6 +17,7 @@ console.log(`Log file path: ${logFilePath}`);
 // Verify the log file path and permissions
 try {
   accessSync(logFilePath, constants.W_OK);
+  console.log(`Log file path is writable: ${logFilePath}`);
 } catch (error) {
   console.error(`Log file path is not writable: ${logFilePath}`);
   if (error instanceof Error) {
@@ -20,6 +29,7 @@ try {
 
 export function logToFile(message: string) {
   const timestamp = new Date().toLocaleString();
+  console.log(`Attempting to log to file: ${message}`);
   try {
     appendFileSync(logFilePath, `${timestamp} ${message}\n`);
     console.log(`Successfully wrote to log file: ${logFilePath}`);
@@ -35,8 +45,10 @@ export function logToFile(message: string) {
 
 export function log(message: string) {
   const timestamp = new Date().toLocaleString();
-  console.log(`${timestamp} ${message}`);
+  console.log(`Logging message: ${message}`);
   if (process.env.LOGGING === 'true') {
     logToFile(message);
+  } else {
+    console.log(`LOGGING environment variable is not set to 'true'`);
   }
 }
