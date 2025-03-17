@@ -5,7 +5,11 @@ const logFilePath = join(__dirname, 'subsyncarr.log');
 
 export function logToFile(message: string) {
   const timestamp = new Date().toLocaleString();
-  appendFileSync(logFilePath, `${timestamp} ${message}\n`);
+  try {
+    appendFileSync(logFilePath, `${timestamp} ${message}\n`);
+  } catch (error) {
+    console.error(`Failed to write to log file: ${error.message}`);
+  }
 }
 
 export function log(message: string) {
