@@ -8,7 +8,12 @@ export function logToFile(message: string) {
   try {
     appendFileSync(logFilePath, `${timestamp} ${message}\n`);
   } catch (error) {
-    console.error(`Failed to write to log file: ${error.message}`);
+    // Ensure the error is of type Error
+    if (error instanceof Error) {
+      console.error(`Failed to write to log file: ${error.message}`);
+    } else {
+      console.error(`Failed to write to log file: ${String(error)}`);
+    }
   }
 }
 
