@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { basename, dirname, join } from 'path';
 import { log } from './loggingConfig'; // Ensure logging is consistent
-import { enableHardwareAcceleration } from './enableHardwareAcceleration'; // Import the hardware acceleration function
+//import { enableHardwareAcceleration } from './enableHardwareAcceleration'; // Import the hardware acceleration function
 
 const execAsync = promisify(exec);
 
@@ -16,11 +16,11 @@ export async function generateFfsubsyncSubtitles(srtFile: string, videoFile: str
   log(`Starting ffsubsync conversion for: ${srtFile} with video file: ${videoFile}`);
 
   // Enable hardware acceleration if available
-  const hardwareAcceleration = enableHardwareAcceleration();
+  //const hardwareAcceleration = enableHardwareAcceleration();
 
   // Ensure paths are correctly quoted
-  const command = `ffsubsync "${videoFile}" -i "${srtFile}" -o "${outputFilePath}" ${hardwareAcceleration}`;
-
+  //const command = `ffsubsync "${videoFile}" -i "${srtFile}" -o "${outputFilePath}" ${hardwareAcceleration}`;
+  const command = `ffsubsync "${videoFile}" -i "${srtFile}" -o "${outputFilePath}"`;
   try {
     const { stdout, stderr } = await execAsync(command);
     log(`Successfully generated: ${outputFilePath}`);
