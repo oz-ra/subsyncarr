@@ -1,43 +1,27 @@
-import { exec } from 'child_process';
-import { dirname } from 'path';
-import { log } from './loggingConfig';
-import { hasServiceBeenProcessed } from './utils';
+import { basename } from 'path';
+import { findMatchingVideoFile } from './findMatchingVideoFile';
+import { generateAutosubsyncSubtitles } from './generateAutosubsyncSubtitles';
+import { generateFfsubsyncSubtitles } from './generateFfsubsyncSubtitles';
+import { generateAlassSubtitles } from './generateAlassSubtitles';
 
-export async function processSrtFile(srtFilePath: string, languageCode: string): Promise<void> {
-    const directory = dirname(srtFilePath);
-    let command = '';
+export const processSrtFile = async (srtFile: string) => {
+  const videoFile = findMatchingVideoFile(srtFile);
+  const includeEngines = process.env.INCLUDE_ENGINES?.split(',') || ['ffsubsync', 'autosubsync', 'alass'];
 
-    if (await hasServiceBeenProcessed(directory, 'ffsubsync')) {
-        log(`Skipping ffsubsync for ${srtFilePath} as it has already been processed.`);
-        return;
-    } else if (await hasServiceBeenProcessed(directory, 'alass')) {
-        log(`Skipping alass for ${srtFilePath} as it has already been processed.`);
-        return;
-    } else if (await hasServiceBeenProcessed(directory, 'autosubsync')) {
-        log(`Skipping autosubsync for ${srtFilePath} as it has already been processed.`);
-        return;
+  if (videoFile) {
+    if (includeEngines.includes('ffsubsync')) {
+      const ffsubsyncResult = await generateFfsubsyncSubtitles(srtFile, videoFile);
+      console.log(`${new Date().toLocaleString()} ffsubsync result: ${ffsubsyncResult.message}`);
     }
-
-    if (srtFilePath.includes('ffsubsync')) {
-        command = `ffsubsync --subtitles ${srtFilePath} --ref ${srtFilePath} --output ${srtFilePath}`;
-    } else if (srtFilePath.includes('alass')) {
-        command = `alass ${srtFilePath} ${srtFilePath}`;
-    } else if (srtFilePath.includes('autosubsync')) {
-        command = `autosubsync ${srtFilePath}`;
-    } else {
-        command = `ffsubsync --subtitles ${srtFilePath} --ref ${srtFilePath} --output ${srtFilePath}`;
+    if (includeEngines.includes('autosubsync')) {
+      const autosubsyncResult = await generateAutosubsyncSubtitles(srtFile, videoFile);
+      console.log(`${new Date().toLocaleString()} autosubsync result: ${autosubsyncResult.message}`);
     }
-
-    log(`Executing command: ${command}`);
-
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            log(`Error processing ${srtFilePath}: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            log(`Error output for ${srtFilePath}: ${stderr}`);
-        }
-        log(`Processed ${srtFilePath}: ${stdout}`);
-    });
-}
+    if (includeEngines.includes('alass')) {
+      const alassResult = await generateAlassSubtitles(srtFile, videoFile);
+      console.log(`${new Date().toLocaleString()} alass result: ${alassResult.message}`);
+    }
+  } else {
+    console.log(`${new Date().toLocaleString()} No matching video file found for: ${basename(srtFile)}`);
+  }
+};

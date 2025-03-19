@@ -1,5 +1,3 @@
-import { log } from './loggingConfig';
-
 export interface ScanConfig {
   includePaths: string[];
   excludePaths: string[];
@@ -18,7 +16,7 @@ export function getScanConfig(): ScanConfig {
   const validIncludePaths = scanPaths.filter((path) => {
     const isValid = validatePath(path);
     if (!isValid) {
-      log(`Invalid include path: ${path}`);
+      console.warn(`${new Date().toLocaleString()} Invalid include path: ${path}`);
     }
     return isValid;
   });
@@ -26,17 +24,20 @@ export function getScanConfig(): ScanConfig {
   const validExcludePaths = excludePaths.filter((path) => {
     const isValid = validatePath(path);
     if (!isValid) {
-      log(`Invalid exclude path: ${path}`);
+      console.warn(`${new Date().toLocaleString()} Invalid exclude path: ${path}`);
     }
     return isValid;
   });
 
   if (validIncludePaths.length === 0) {
-    log(`No valid scan paths provided, defaulting to /scan_dir`);
+    console.warn(`${new Date().toLocaleString()} No valid scan paths provided, defaulting to /scan_dir`);
     validIncludePaths.push('/scan_dir');
   }
 
-  log(`Scan configuration: ${JSON.stringify({ includePaths: validIncludePaths, excludePaths: validExcludePaths })}`);
+  console.log(`${new Date().toLocaleString()} Scan configuration:`, {
+    includePaths: validIncludePaths,
+    excludePaths: validExcludePaths,
+  });
 
   return {
     includePaths: validIncludePaths,
