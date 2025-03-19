@@ -29,10 +29,10 @@ try {
 
 export function logToFile(message: string) {
   const timestamp = new Date().toLocaleString();
-  console.log(`Attempting to log to file: ${message}`);
+  //console.log(`Attempting to log to file: ${message}`);
   try {
     appendFileSync(logFilePath, `${timestamp} ${message}\n`);
-    console.log(`Successfully wrote to log file: ${logFilePath}`);
+    //console.log(`Successfully wrote to log file: ${logFilePath}`);
   } catch (error) {
     // Ensure the error is of type Error
     if (error instanceof Error) {
