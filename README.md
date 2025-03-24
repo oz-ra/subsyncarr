@@ -137,11 +137,11 @@ services:
     environment:
       - TZ=Etc/UTC # Replace with your own timezone
       - CRON_SCHEDULE=0 0 * * * # Runs every day at midnight by default
-      - SCAN_PATHS=/movies,/tv,/anime # Remember to mount these as volumes. Must begin with /. Default value is `/scan_dir`
+      - SCAN_PATHS=/movies,/tv,/anime # Remember to mount these as volumes. Must begin with /. Default valus is `/scan_dir`
       - EXCLUDE_PATHS=/movies/temp,/tv/downloads # Exclude certain sub-directories from the scan
+      - EXCLUDE_FILES= # Exclude certain subtitle files from the scan.
       - MAX_CONCURRENT_SYNC_TASKS=1 # Defaults to 1 if not set. Higher number will consume more CPU but sync your library faster
       - INCLUDE_ENGINES=ffsubsync,autosubsync # If not set, all engines are used by default
-      - LANGUAGE_CODE=en # Specify the ISO 639-1 language code (e.g., "en" for English) (Defaults to en if not supplied but is removed if supplied as "")
 
 ```
 
@@ -175,6 +175,12 @@ This document provides a detailed explanation of the environment variables used 
 - **Example Value**: `/movies/temp,/tv/downloads`
 - **Result**: The application will exclude the specified paths from the scan.
 - **Default**: If not supplied, no paths will be excluded.
+
+### `EXCLUDE_PATHS`
+- **Description**: Specifies files/file-patterns to exclude from the scan. (files not to be processed)
+- **Example Value**: `aisub.srt,moviename.something.srt`
+- **Result**: The application will exclude the specified files from the scan.
+- **Default**: If not supplied, no files will be excluded.
 
 ### `MAX_CONCURRENT_SYNC_TASKS`
 - **Description**: Sets the maximum number of concurrent sync tasks.

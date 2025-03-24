@@ -75,4 +75,4 @@ tail -f /app/logs/app.log' > /app/startup.sh
 RUN chmod +x /app/startup.sh
 
 # Use startup script as entrypoint
-CMD ["/app/startup.sh"]
+# CMD ["/app/startup.sh"]

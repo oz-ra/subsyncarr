@@ -1,6 +1,7 @@
 export interface ScanConfig {
   includePaths: string[];
   excludePaths: string[];
+  excludeFilePatterns: string[]; // Add this property
 }
 
 function validatePath(path: string): boolean {
@@ -11,6 +12,7 @@ function validatePath(path: string): boolean {
 export function getScanConfig(): ScanConfig {
   const scanPaths = process.env.SCAN_PATHS?.split(',').filter(Boolean) || ['/scan_dir'];
   const excludePaths = process.env.EXCLUDE_PATHS?.split(',').filter(Boolean) || [];
+  const excludeFilePatterns = process.env.EXCLUDE_FILES?.split(',').map((pattern) => pattern.trim()) || []; // Read EXCLUDE_FILES
 
   // Validate paths
   const validIncludePaths = scanPaths.filter((path) => {
@@ -37,10 +39,12 @@ export function getScanConfig(): ScanConfig {
   console.log(`${new Date().toLocaleString()} Scan configuration:`, {
     includePaths: validIncludePaths,
     excludePaths: validExcludePaths,
+    excludeFilePatterns, // Log the exclude file patterns
   });
 
   return {
     includePaths: validIncludePaths,
     excludePaths: validExcludePaths,
+    excludeFilePatterns, // Include in the returned config
   };
 }

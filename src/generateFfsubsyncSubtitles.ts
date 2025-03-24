@@ -2,10 +2,17 @@ import { basename, dirname, join } from 'path';
 import { execPromise, ProcessingResult } from './helpers';
 import { existsSync } from 'fs';
 
+// Helper function to extract language code from the base filename
+function extractLanguageCode(filename: string): string {
+  const match = filename.match(/\.([a-z]{2})\.srt$/);
+  return match ? match[1] : 'en'; // Default to 'en' if no language code is found
+}
+
 export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: string): Promise<ProcessingResult> {
   const directory = dirname(srtPath);
   const srtBaseName = basename(srtPath, '.srt');
-  const outputPath = join(directory, `${srtBaseName}.ffsubsync.srt`);
+  const languageCode = extractLanguageCode(srtBaseName);
+  const outputPath = join(directory, `${srtBaseName}.ffsync-${languageCode}.srt`);
 
   // Check if synced subtitle already exists
   const exists = existsSync(outputPath);
