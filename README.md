@@ -84,36 +84,18 @@ moviename.alass.srt
 
 
 - After the Change
-
-```txt
-moviename.ffsubsync.[languageCode].srt
-moviename.autosubsync.[languageCode].srt
-moviename.alass.[languageCode].srt
-```
-
-
-For instance, if the language code is en (for English):
-
-```txt
-moviename.ffsubsync.en.srt
-moviename.autosubsync.en.srt
-moviename.alass.en.srt
-```
-
 #### Summary of Output Filename Conventions:
 
 With language code (default to "en" if not supplied):
 ```txt
-moviename.ffsubsync.en.srt
-moviename.autosubsync.en.srt
-moviename.alass.en.srt
-```
+For both ffsubsync and autosubsync and Alass:
 
-Without language code (when supplied as an empty string):
-```txt
-moviename.ffsubsync.srt
-moviename.autosubsync.srt
-moviename.alass.srt
+Input file: movie.en.srt
+Output file: movie.ffsync-en.srt or movie.autsync-en.srt
+Input file: movie.eng.sdh.srt
+Output file: movie.ffsync-eng-sdh.srt or movie.autsync-eng-sdh.srt
+Input file: movie.sdh.srt (no language code)
+Output file: movie.ffsync-en-sdh.srt or movie.autsync-en-sdh.srt (default language code is 'en').
 ```
 
 
