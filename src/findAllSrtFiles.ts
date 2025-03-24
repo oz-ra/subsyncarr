@@ -22,7 +22,7 @@ export async function findAllSrtFiles(config: ScanConfig): Promise<string[]> {
         entry.isFile() &&
         extname(entry.name).toLowerCase() === '.srt' &&
         !entry.name.includes('ffsync') &&
-        !entry.name.includes('alasync') &&
+        !entry.name.includes('alassync') &&
         !entry.name.includes('autsync') &&
         !config.excludeFilePatterns.some((pattern) => entry.name.includes(pattern)) // Use config.excludeFilePatterns
       ) {
