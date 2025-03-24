@@ -8,12 +8,19 @@ function extractLanguageCode(filename: string): string {
   return match ? match[1] : 'en'; // Default to 'en' if no language code is found
 }
 
+// Helper function to remove the language code from the base filename
+function removeLanguageCode(filename: string): string {
+  return filename.replace(/\.([a-z]{2})$/, ''); // Removes the language code (e.g., ".en")
+}
+
 export async function generateAutosubsyncSubtitles(srtPath: string, videoPath: string): Promise<ProcessingResult> {
   const directory = dirname(srtPath);
   const srtBaseName = basename(srtPath, '.srt');
   const languageCode = extractLanguageCode(srtBaseName);
-  const outputPath = join(directory, `${srtBaseName}.autsync-${languageCode}.srt`);
+  const baseNameWithoutLang = removeLanguageCode(srtBaseName); // Remove language code
+  const outputPath = join(directory, `${baseNameWithoutLang}.autsync-${languageCode}.srt`); // Append language code to .autsync
 
+  // Check if synced subtitle already exists
   const exists = existsSync(outputPath);
   if (exists) {
     return {
