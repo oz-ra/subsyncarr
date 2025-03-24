@@ -4,8 +4,8 @@ import { existsSync } from 'fs';
 
 // Helper function to extract language code from the base filename
 function extractLanguageCode(filename: string): string {
-  const match = filename.match(/\.([a-z]{2,3})\.srt$/); // Match 2 or 3 letter language codes
-  return match ? match[1] : 'en'; // Default to 'en' if no language code is found
+  const match = filename.match(/\.([a-z]{2,3})$/); // Match 2 or 3 letter language codes at the end
+  return match ? match[1] : ''; // Return an empty string if no language code is found
 }
 
 // Helper function to remove the language code from the base filename
@@ -25,7 +25,8 @@ export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: str
   const baseNameWithoutLang = removeLanguageCode(srtBaseName); // Remove language code
   const isSdh = isSdhSubtitle(srtBaseName); // Check if the subtitle is SDH
   const sdhSuffix = isSdh ? '-sdh' : ''; // Append "-sdh" if it's an SDH subtitle
-  const outputPath = join(directory, `${baseNameWithoutLang}.ffsync-${languageCode}${sdhSuffix}.srt`); // Append language code and SDH suffix
+  const langSuffix = languageCode ? `-${languageCode}` : ''; // Append language code only if it exists
+  const outputPath = join(directory, `${baseNameWithoutLang}.ffsync${langSuffix}${sdhSuffix}.srt`); // Append language code and SDH suffix
 
   // Check if synced subtitle already exists
   const exists = existsSync(outputPath);
