@@ -1,0 +1,96 @@
+Sure, here's the code rewritten without using regular expressions:
+
+
+
+
+
+
+import { basename, dirname, join } from 'path';
+import { execPromise, ProcessingResult } from './helpers';
+import { existsSync } from 'fs';
+
+// Helper function to extract language code from the filename
+function extractLanguageCode(filename: string): string {
+  const parts = filename.toLowerCase().split('.'); // Convert filename to lowercase and split by '.'
+  for (let i = 0; i < parts.length - 1; i++) {
+    if ((parts[i + 1] === 'sdh' || parts[i + 1] === 'srt') && parts[i].length >= 2 && parts[i].length <= 3) {
+      return parts[i];
+    }
+  }
+  return '';
+}
+
+
+// Helper function to extract language code from the filename
+function extractLanguageCode(filename: string): string {
+  // Split the filename into parts using '.' as a delimiter
+  const parts = filename.split('.');
+  
+  // Traverse parts to find a 2-3 letter language code before ".sdh" or ".srt"
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    const nextPart = parts[i + 1].toLowerCase();
+
+    if ((nextPart === 'sdh' || nextPart === 'srt') && part.length >= 2 && part.length <= 3) {
+      return part; // Return the language code if found
+    }
+  }
+
+  return ''; // Return an empty string if no language code is found
+}
+
+
+
+
+
+// Helper function to check if the filename contains ".sdh"
+function isSdhSubtitle(filename: string): boolean {
+  return filename.toLowerCase().includes('.sdh.');
+}
+
+// Helper function to remove the language code and ".sdh" suffix from the base filename
+function removeLanguageAndSdh(filename: string): string {
+  const parts = filename.split('.');
+  const result = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i] !== 'sdh' && (parts[i + 1] !== 'sdh' && parts[i + 1] !== 'srt')) {
+      result.push(parts[i]);
+    }
+  }
+  return result.join('.');
+}
+
+export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: string): Promise<ProcessingResult> {
+  const directory = dirname(srtPath);
+  const srtBaseName = basename(srtPath, '.srt'); // Get the base name without the ".srt" extension
+  const languageCode = extractLanguageCode(srtBaseName); // Extract the language code (e.g., "en", "eng")
+  const isSdh = isSdhSubtitle(srtBaseName); // Check if the subtitle is SDH
+  const baseNameWithoutLang = removeLanguageAndSdh(srtBaseName); // Remove language code and ".sdh"
+  const sdhSuffix = isSdh ? '-sdh' : ''; // Add "-sdh" if it's an SDH subtitle
+  const langSuffix = languageCode ? `-${languageCode}` : ''; // Add the language code if it exists
+  const outputPath = join(directory, `${baseNameWithoutLang}.ffsync${langSuffix}${sdhSuffix}.srt`); // Construct the output filename
+
+  // Check if the synced subtitle already exists
+  if (existsSync(outputPath)) {
+    return {
+      success: true,
+      message: `Skipping ${outputPath} - already processed`,
+    };
+  }
+
+  try {
+    const command = `ffsubsync "${videoPath}" -i "${srtPath}" -o "${outputPath}"`;
+    console.log(`${new Date().toLocaleString()} Processing: ${command}`);
+    await execPromise(command);
+    return {
+      success: true,
+      message: `Successfully processed: ${outputPath}`,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      message: `Error processing ${outputPath}: ${errorMessage}`,
+    };
+  }
+}

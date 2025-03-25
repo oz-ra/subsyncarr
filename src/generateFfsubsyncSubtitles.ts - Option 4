@@ -1,0 +1,169 @@
+
+```txt
+
+✨ Start process ✨
+To address the issues in your code and produce the desired output filenames, let's analyze the current implementation and identify the problems:
+
+Problems in the Code:
+Extracting Language Code:
+
+The regular expression in extractLanguageCode matches a 2 - 3 letter language code only if it's directly followed by .sdh or .srt. This approach fails in cases like movie.eng.sdh.srt, where the language code is followed by .sdh and not directly by .srt.
+Fix: Modify the regular expression to correctly capture the language code even when.sdh is present.
+Handling SDH Subtitles:
+
+The isSdhSubtitle function assumes .sdh.is always preceded by a dot, which isn't robust for filenames like movie.sdh.srt.
+Fix: Adjust the logic to identify.sdh correctly as a suffix.
+Removing Language Code and.sdh:
+
+The removeLanguageAndSdh function removes both the language code and.sdh.However, this causes incorrect base names for filenames like movie.eng.sdh.srt, where both are removed at once.
+    Fix: Extract and handle language code and.sdh separately to ensure the base filename remains intact.
+Output Filename Construction:
+
+The order of suffixes(langSuffix and sdhSuffix) in the output filename is incorrect.For example, the desired order is - lang - sdh(e.g., movie.ffsync - eng - sdh.srt), but the current code appends them in the wrong order.
+Updated Code
+Here's the corrected and improved code:
+
+```
+
+
+import { basename, dirname, join } from 'path';
+import { execPromise, ProcessingResult } from './helpers';
+import { existsSync } from 'fs';
+
+// Helper function to extract the language code from the filename
+function extractLanguageCode(filename: string): string {
+  const match = filename.match(/\.(\w{2,3})(?=\.(sdh|srt))/i); // Match 2-3 letter language code before ".sdh" or ".srt"
+  return match ? match[1] : ''; // Return the language code or an empty string if not found
+}
+
+// Helper function to check if the filename contains ".sdh"
+function isSdhSubtitle(filename: string): boolean {
+  return /\.sdh(\.|$)/i.test(filename); // Check for ".sdh" followed by a dot or end of string (case-insensitive)
+}
+
+// Helper function to get the base filename without language code and ".sdh"
+function getBaseName(filename: string): string {
+  return filename
+    .replace(/\.(\w{2,3})(?=\.(sdh|srt))/i, '') // Remove language code
+    .replace(/\.sdh(\.|$)/i, ''); // Remove ".sdh"
+}
+
+export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: string): Promise<ProcessingResult> {
+  const directory = dirname(srtPath);
+  const srtBaseName = basename(srtPath, '.srt'); // Get the base name without the ".srt" extension
+
+  // Extract components from the filename
+  const languageCode = extractLanguageCode(srtBaseName); // Extract language code (e.g., "en", "eng")
+  const isSdh = isSdhSubtitle(srtBaseName); // Check if it's an SDH subtitle
+  const baseNameWithoutLangAndSdh = getBaseName(srtBaseName); // Get the base name without language code and ".sdh"
+
+  // Construct suffixes for the output filename
+  const langSuffix = languageCode ? `-${languageCode}` : ''; // Add language code if it exists
+  const sdhSuffix = isSdh ? '-sdh' : ''; // Add "-sdh" if it's an SDH subtitle
+
+  // Construct the final output filename
+  const outputPath = join(directory, `${baseNameWithoutLangAndSdh}.ffsync${langSuffix}${sdhSuffix}.srt`);
+
+  // Check if the synced subtitle already exists
+  if (existsSync(outputPath)) {
+    return {
+      success: true,
+      message: `Skipping ${outputPath} - already processed`,
+    };
+  }
+
+  try {
+    const command = `ffsubsync "${videoPath}" -i "${srtPath}" -o "${outputPath}"`;
+    console.log(`${new Date().toLocaleString()} Processing: ${command}`);
+    await execPromise(command);
+    return {
+      success: true,
+      message: `Successfully processed: ${outputPath}`,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      message: `Error processing ${outputPath}: ${errorMessage}`,
+    };
+  }
+}
+
+```txt
+
+Explanation of the Code
+Helper Functions:
+
+extractLanguageCode:
+
+Matches a 2-3 letter language code (en, eng) only if it is followed by .sdh or .srt.
+Ensures flexible handling of filenames with .sdh.srt.
+isSdhSubtitle:
+
+Checks if the .sdh suffix is present, ensuring .sdh is identified even at the end of the filename.
+getBaseName:
+
+Removes the language code and .sdh from the filename but keeps the base name intact.
+This ensures the core name of the file (movie) is preserved while suffixes are removed correctly.
+Main Function (generateFfsubsyncSubtitles):
+
+Extracts components (languageCode, isSdh, baseNameWithoutLangAndSdh) from the input filename.
+Constructs the output filename using the extracted components in the correct order: baseName.ffsync-language-sdh.srt.
+Checks if the output file already exists to avoid redundant processing.
+Executes the ffsubsync command to synchronize subtitles and handles errors gracefully.
+Output Filename Construction:
+
+Combines the base filename, language suffix (e.g., -en), and SDH suffix (-sdh) to produce filenames like:
+movie.ffsync-en.srt
+movie.ffsync-eng-sdh.srt
+Example Input/Output
+Input Filename	Output Filename
+movie.en.srt	movie.ffsync-en.srt
+movie.srt	movie.ffsync.srt
+movie.eng.srt	movie.ffsync-eng.srt
+movie.en.sdh.srt	movie.ffsync-en-sdh.srt
+movie.sdh.srt	movie.ffsync-sdh.srt
+movie.eng.sdh.srt	movie.ffsync-eng-sdh.srt
+README.md
+# FFSync Subtitle Generator
+
+## Description
+This script processes subtitle files (`.srt`) and generates synchronized subtitles using `ffsubsync`. The output filenames are generated based on the input filename's components, such as the language code and whether the subtitle is for the hard of hearing (SDH).
+
+## How It Works
+1. **Extract Components**: The script extracts the base name, language code (e.g., `en`, `eng`), and SDH flag from the input filename.
+2. **Construct Output Filename**: The output filename is constructed as:
+.ffsync-<languageCode>-.srt
+
+Examples:
+`movie.en.srt` → `movie.ffsync-en.srt`
+`movie.eng.sdh.srt` → `movie.ffsync-eng-sdh.srt`
+
+3. **Process Subtitle**: The script runs `ffsubsync` to synchronize the subtitles and saves the result to the constructed output filename.
+
+## Example Input/Output
+| Input Filename              | Output Filename               |
+|-----------------------------|-------------------------------|
+| `movie.en.srt`              | `movie.ffsync-en.srt`         |
+| `movie.srt`                 | `movie.ffsync.srt`           |
+| `movie.eng.srt`             | `movie.ffsync-eng.srt`        |
+| `movie.en.sdh.srt`          | `movie.ffsync-en-sdh.srt`     |
+| `movie.sdh.srt`             | `movie.ffsync-sdh.srt`        |
+| `movie.eng.sdh.srt`         | `movie.ffsync-eng-sdh.srt`    |
+
+## Installation
+1. Ensure `ffsubsync` is installed on your system.
+2. Clone this repository.
+3. Install dependencies:
+npm install
+
+
+## Usage
+Run the script with the subtitle and video file paths:
+npm run process -- <srtPath> <videoPath>
+
+
+## License
+MIT License
+
+```

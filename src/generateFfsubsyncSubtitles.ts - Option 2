@@ -1,0 +1,107 @@
+
+The code below does not produce the output filenames that I want for the relevant input filenames.
+
+Input Filename: movie.en.srt	Output Filename:movie.ffsync-en.srt
+Input Filename: movie.srt	Output Filename:Output Filename: movie.ffsync.srt
+Input Filename: movie.eng.srt	Output Filename: movie.ffsync-eng.srt
+Input Filename: movie.en.sdh.srt	Output Filename: movie.ffsync-en-sdh.srt
+Input Filename: movie.sdh.srt	Output Filename: movie.ffsync-sdh.srt
+Input Filename: movie.eng.sdh.srt	Output Filename:movie.ffsync-eng-sdh.srt
+
+en/eng is the languageCode for the subtitles
+shd is used to indicate hard of hearing subtitles
+
+
+What problems are there and what changes do I need to make to get the desired output filename?
+Explain all code please and produce the output as a readme.md file.
+
+import { basename, dirname, join } from 'path';
+import { execPromise, ProcessingResult } from './helpers';
+import { existsSync } from 'fs';
+
+// Helper function to extract language code from the filename
+function extractLanguageCode(filename: string): string {
+  // Split the filename into parts using '.' as a delimiter
+  const parts = filename.split('.');
+  
+  // Traverse parts to find a 2-3 letter language code before ".sdh" or ".srt"
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    const nextPart = parts[i + 1].toLowerCase();
+
+    if ((nextPart === 'sdh' || nextPart === 'srt') && part.length >= 2 && part.length <= 3) {
+      return part; // Return the language code if found
+    }
+  }
+
+  return ''; // Return an empty string if no language code is found
+}
+
+// Helper function to check if the filename contains ".sdh"
+function isSdhSubtitle(filename: string): boolean {
+  // Convert the filename to lowercase and check if ".sdh." exists
+  return filename.toLowerCase().includes('.sdh.');
+}
+
+// Helper function to remove the language code and ".sdh" suffix from the base filename
+function removeLanguageAndSdh(filename: string): string {
+  // Split the filename into parts using '.' as a delimiter
+  const parts = filename.split('.');
+  const result: string[] = [];
+
+  // Traverse parts and add valid parts to the result
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i].toLowerCase();
+
+    // Skip 2-3 letter language codes before ".sdh" or ".srt"
+    if (
+      i < parts.length - 1 &&
+      parts[i + 1].toLowerCase() === 'sdh' &&
+      part.length >= 2 &&
+      part.length <= 3
+    ) {
+      i++; // Skip the language code and ".sdh"
+    } else if (part !== 'sdh') {
+      result.push(parts[i]); // Add only valid parts to the result
+    }
+  }
+
+  return result.join('.'); // Reconstruct the filename without the language code and ".sdh"
+}
+
+
+
+export async function generateFfsubsyncSubtitles(srtPath: string, videoPath: string): Promise<ProcessingResult> {
+  const directory = dirname(srtPath);
+  const srtBaseName = basename(srtPath, '.srt'); // Get the base name without the ".srt" extension
+  const languageCode = extractLanguageCode(srtBaseName); // Extract the language code (e.g., "en", "eng")
+  const isSdh = isSdhSubtitle(srtBaseName); // Check if the subtitle is SDH
+  const baseNameWithoutLang = removeLanguageAndSdh(srtBaseName); // Remove language code and ".sdh"
+  const sdhSuffix = isSdh ? '-sdh' : ''; // Add "-sdh" if it's an SDH subtitle
+  const langSuffix = languageCode ? `-${languageCode}` : ''; // Add the language code if it exists
+  const outputPath = join(directory, `${baseNameWithoutLang}.ffsync${langSuffix}${sdhSuffix}.srt`); // Construct the output filename
+
+  // Check if the synced subtitle already exists
+  if (existsSync(outputPath)) {
+    return {
+      success: true,
+      message: `Skipping ${outputPath} - already processed`,
+    };
+  }
+
+  try {
+    const command = `ffsubsync "${videoPath}" -i "${srtPath}" -o "${outputPath}"`;
+    console.log(`${new Date().toLocaleString()} Processing: ${command}`);
+    await execPromise(command);
+    return {
+      success: true,
+      message: `Successfully processed: ${outputPath}`,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      message: `Error processing ${outputPath}: ${errorMessage}`,
+    };
+  }
+}
